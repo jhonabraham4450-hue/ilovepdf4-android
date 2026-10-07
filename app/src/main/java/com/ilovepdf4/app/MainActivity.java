@@ -16,6 +16,9 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.app.DownloadManager;
+import android.os.Environment;
+import android.webkit.URLUtil;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -679,6 +682,72 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
 
+   webView.setDownloadListener(
+        (url, userAgent, contentDisposition, mimetype, contentLength) -> {
+
+            try {
+
+                DownloadManager.Request request =
+                        new DownloadManager.Request(
+                                Uri.parse(url)
+                        );
+
+                String cookies =
+                        CookieManager.getInstance()
+                                .getCookie(url);
+
+                if (cookies != null) {
+                    request.addRequestHeader(
+                            "Cookie",
+                            cookies
+                    );
+                }
+
+                request.addRequestHeader(
+                        "User-Agent",
+                        userAgent
+                );
+
+                String fileName =
+                        URLUtil.guessFileName(
+                                url,
+                                contentDisposition,
+                                mimetype
+                        );
+
+                request.setTitle(fileName);
+
+                request.setDescription(
+                        "Downloading from iLovePDF4"
+                );
+
+                request.setNotificationVisibility(
+                        DownloadManager.Request
+                                .VISIBILITY_VISIBLE_NOTIFY_COMPLETED
+                );
+
+                request.setMimeType(mimetype);
+
+                request.setDestinationInExternalPublicDir(
+                        Environment.DIRECTORY_DOWNLOADS,
+                        fileName
+                );
+
+                DownloadManager manager =
+                        (DownloadManager)
+                                getSystemService(
+                                        DOWNLOAD_SERVICE
+                                );
+
+                if (manager != null) {
+                    manager.enqueue(request);
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+);     
         webView.setWebChromeClient(
                 new WebChromeClient() {
 
