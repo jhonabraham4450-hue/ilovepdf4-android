@@ -18,7 +18,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
-import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -67,17 +67,14 @@ public class MainActivity extends AppCompatActivity {
 
     private GradientDrawable gradientBackground() {
 
-        GradientDrawable drawable =
-                new GradientDrawable(
-                        GradientDrawable.Orientation.TL_BR,
-                        new int[]{
-                                Color.rgb(255, 235, 235),
-                                Color.WHITE,
-                                Color.rgb(235, 244, 255)
-                        }
-                );
-
-        return drawable;
+        return new GradientDrawable(
+                GradientDrawable.Orientation.TL_BR,
+                new int[]{
+                        Color.rgb(255, 235, 235),
+                        Color.WHITE,
+                        Color.rgb(235, 244, 255)
+                }
+        );
     }
 
     @Override
@@ -102,8 +99,8 @@ public class MainActivity extends AppCompatActivity {
                     public void handleOnBackPressed() {
 
                         if (webView != null &&
-                                webView.getVisibility()
-                                        == View.VISIBLE &&
+                                webView.getVisibility() ==
+                                        View.VISIBLE &&
                                 webView.canGoBack()) {
 
                             webView.goBack();
@@ -123,7 +120,6 @@ public class MainActivity extends AppCompatActivity {
                 new ScrollView(this);
 
         scrollView.setFillViewport(true);
-
         scrollView.setBackground(
                 gradientBackground()
         );
@@ -135,17 +131,20 @@ public class MainActivity extends AppCompatActivity {
                 LinearLayout.VERTICAL
         );
 
-        main.setGravity(Gravity.CENTER_HORIZONTAL);
+        main.setGravity(
+                Gravity.CENTER_HORIZONTAL
+        );
 
         main.setPadding(
-                dp(22),
-                dp(30),
-                dp(22),
-                dp(25)
+                dp(18),
+                dp(24),
+                dp(18),
+                dp(22)
         );
 
         scrollView.addView(main);
 
+        // LOGO
         TextView logo =
                 new TextView(this);
 
@@ -164,10 +163,11 @@ public class MainActivity extends AppCompatActivity {
                 logo,
                 new LinearLayout.LayoutParams(
                         -1,
-                        dp(55)
+                        dp(52)
                 )
         );
 
+        // TAGLINE
         TextView tagline =
                 new TextView(this);
 
@@ -175,104 +175,85 @@ public class MainActivity extends AppCompatActivity {
                 "Work Smarter • Not Harder"
         );
 
-        tagline.setTextSize(15);
+        tagline.setTextSize(14);
         tagline.setTextColor(
                 Color.rgb(90, 90, 90)
         );
         tagline.setGravity(Gravity.CENTER);
 
-        LinearLayout.LayoutParams tagParams =
+        LinearLayout.LayoutParams taglineParams =
                 new LinearLayout.LayoutParams(
                         -1,
-                        dp(35)
+                        dp(32)
                 );
 
-        tagParams.bottomMargin = dp(12);
+        taglineParams.bottomMargin = dp(12);
 
-        main.addView(tagline, tagParams);
+        main.addView(
+                tagline,
+                taglineParams
+        );
 
-        LinearLayout hero =
+        // IMAGE CARD
+        LinearLayout imageCard =
                 new LinearLayout(this);
 
-        hero.setOrientation(
+        imageCard.setOrientation(
                 LinearLayout.VERTICAL
         );
 
-        hero.setGravity(Gravity.CENTER);
+        imageCard.setGravity(Gravity.CENTER);
 
-        hero.setPadding(
-                dp(20),
-                dp(22),
-                dp(20),
-                dp(22)
+        imageCard.setPadding(
+                dp(8),
+                dp(8),
+                dp(8),
+                dp(8)
         );
 
-        hero.setBackground(
+        imageCard.setBackground(
                 roundedBackground(
                         Color.WHITE,
-                        26
+                        24
                 )
         );
 
-        LinearLayout.LayoutParams heroParams =
+        LinearLayout.LayoutParams imageCardParams =
                 new LinearLayout.LayoutParams(
                         -1,
-                        dp(190)
+                        dp(270)
                 );
 
-        heroParams.bottomMargin = dp(18);
+        imageCardParams.bottomMargin = dp(18);
 
-        main.addView(hero, heroParams);
+        main.addView(
+                imageCard,
+                imageCardParams
+        );
 
-        TextView pdfIcon =
-                new TextView(this);
+        // ACTUAL IMAGE
+        ImageView homeImage =
+                new ImageView(this);
 
-        pdfIcon.setText("📄");
-        pdfIcon.setTextSize(55);
-        pdfIcon.setGravity(Gravity.CENTER);
+        homeImage.setImageResource(
+                R.drawable.ilovepdf4_home
+        );
 
-        hero.addView(
-                pdfIcon,
+        homeImage.setScaleType(
+                ImageView.ScaleType.CENTER_CROP
+        );
+
+        homeImage.setAdjustViewBounds(true);
+
+        imageCard.addView(
+                homeImage,
                 new LinearLayout.LayoutParams(
                         -1,
-                        dp(75)
+                        -1
                 )
         );
 
-        TextView heroTitle =
-                new TextView(this);
-
-        heroTitle.setText(
-                "All Your PDF Tools\nIn One Place"
-        );
-
-        heroTitle.setTextSize(22);
-        heroTitle.setTypeface(
-                Typeface.DEFAULT,
-                Typeface.BOLD
-        );
-        heroTitle.setTextColor(
-                Color.rgb(35, 35, 35)
-        );
-        heroTitle.setGravity(Gravity.CENTER);
-
-        hero.addView(heroTitle);
-
-        TextView heroText =
-                new TextView(this);
-
-        heroText.setText(
-                "Fast • Simple • Secure"
-        );
-
-        heroText.setTextSize(14);
-        heroText.setTextColor(
-                Color.rgb(110, 110, 110)
-        );
-        heroText.setGravity(Gravity.CENTER);
-
-        hero.addView(heroText);
-
+        // WELCOME
         TextView welcome =
                 new TextView(this);
 
@@ -285,9 +266,11 @@ public class MainActivity extends AppCompatActivity {
                 Typeface.DEFAULT,
                 Typeface.BOLD
         );
+
         welcome.setTextColor(
                 Color.rgb(35, 35, 35)
         );
+
         welcome.setGravity(Gravity.CENTER);
 
         LinearLayout.LayoutParams welcomeParams =
@@ -303,6 +286,7 @@ public class MainActivity extends AppCompatActivity {
                 welcomeParams
         );
 
+        // LOGIN
         Button login =
                 createButton(
                         "Login",
@@ -327,6 +311,7 @@ public class MainActivity extends AppCompatActivity {
                 v -> openWebsite(BASE_URL)
         );
 
+        // REGISTER + ADMIN
         LinearLayout accountRow =
                 new LinearLayout(this);
 
@@ -352,23 +337,23 @@ public class MainActivity extends AppCompatActivity {
                         Color.WHITE
                 );
 
-        LinearLayout.LayoutParams smallButton =
+        LinearLayout.LayoutParams registerParams =
                 new LinearLayout.LayoutParams(
                         0,
                         dp(52),
                         1
                 );
 
-        smallButton.setMargins(
+        registerParams.setMargins(
                 0,
                 0,
-                dp(6),
+                dp(5),
                 0
         );
 
         accountRow.addView(
                 register,
-                smallButton
+                registerParams
         );
 
         LinearLayout.LayoutParams adminParams =
@@ -379,7 +364,7 @@ public class MainActivity extends AppCompatActivity {
                 );
 
         adminParams.setMargins(
-                dp(6),
+                dp(5),
                 0,
                 0,
                 0
@@ -408,6 +393,7 @@ public class MainActivity extends AppCompatActivity {
                 v -> openWebsite(ADMIN_URL)
         );
 
+        // FORGOT PASSWORD
         TextView forgot =
                 new TextView(this);
 
@@ -416,9 +402,15 @@ public class MainActivity extends AppCompatActivity {
         );
 
         forgot.setTextSize(14);
+        forgot.setTypeface(
+                Typeface.DEFAULT,
+                Typeface.BOLD
+        );
+
         forgot.setTextColor(
                 Color.rgb(211, 47, 47)
         );
+
         forgot.setGravity(Gravity.CENTER);
 
         LinearLayout.LayoutParams forgotParams =
@@ -427,7 +419,7 @@ public class MainActivity extends AppCompatActivity {
                         dp(45)
                 );
 
-        forgotParams.topMargin = dp(8);
+        forgotParams.topMargin = dp(6);
 
         main.addView(
                 forgot,
@@ -440,6 +432,7 @@ public class MainActivity extends AppCompatActivity {
                 )
         );
 
+        // TOOLS
         TextView tools =
                 new TextView(this);
 
@@ -452,41 +445,45 @@ public class MainActivity extends AppCompatActivity {
         tools.setTextColor(
                 Color.rgb(100, 100, 100)
         );
+
         tools.setGravity(Gravity.CENTER);
 
         LinearLayout.LayoutParams toolsParams =
                 new LinearLayout.LayoutParams(
                         -1,
-                        dp(60)
+                        dp(58)
                 );
 
-        toolsParams.topMargin = dp(12);
+        toolsParams.topMargin = dp(8);
 
         main.addView(
                 tools,
                 toolsParams
         );
 
+        // FOOTER
         TextView footer =
                 new TextView(this);
 
         footer.setText(
-                "Safe • Fast • Easy to Use\n\n© iLovePDF4"
+                "Safe • Fast • Easy to Use\n\n" +
+                "© iLovePDF4"
         );
 
         footer.setTextSize(12);
         footer.setTextColor(
                 Color.rgb(130, 130, 130)
         );
+
         footer.setGravity(Gravity.CENTER);
 
         LinearLayout.LayoutParams footerParams =
                 new LinearLayout.LayoutParams(
                         -1,
-                        dp(70)
+                        dp(65)
                 );
 
-        footerParams.topMargin = dp(8);
+        footerParams.topMargin = dp(5);
 
         main.addView(
                 footer,
@@ -508,6 +505,7 @@ public class MainActivity extends AppCompatActivity {
         button.setText(text);
         button.setTextSize(14);
         button.setTextColor(textColor);
+
         button.setAllCaps(false);
 
         button.setTypeface(
@@ -544,7 +542,8 @@ public class MainActivity extends AppCompatActivity {
                 Color.WHITE
         );
 
-        webView = new WebView(this);
+        webView =
+                new WebView(this);
 
         RelativeLayout.LayoutParams webParams =
                 new RelativeLayout.LayoutParams(
@@ -670,9 +669,12 @@ public class MainActivity extends AppCompatActivity {
                             String page
                     ) {
 
-                        progress.setVisibility(
-                                View.GONE
-                        );
+                        if (progress != null) {
+
+                            progress.setVisibility(
+                                    View.GONE
+                            );
+                        }
                     }
                 }
         );
@@ -722,11 +724,14 @@ public class MainActivity extends AppCompatActivity {
                             int newProgress
                     ) {
 
-                        progress.setVisibility(
-                                newProgress >= 100
-                                        ? View.GONE
-                                        : View.VISIBLE
-                        );
+                        if (progress != null) {
+
+                            progress.setVisibility(
+                                    newProgress >= 100
+                                            ? View.GONE
+                                            : View.VISIBLE
+                            );
+                        }
                     }
                 }
         );
