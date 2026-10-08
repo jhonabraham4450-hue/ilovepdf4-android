@@ -2,23 +2,23 @@ package com.ilovepdf4.app;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.DownloadManager;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.Gravity;
 import android.view.View;
 import android.webkit.CookieManager;
+import android.webkit.URLUtil;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.app.DownloadManager;
-import android.os.Environment;
-import android.webkit.URLUtil;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -27,6 +27,7 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
@@ -41,11 +42,11 @@ public class MainActivity extends AppCompatActivity {
     private static final String ADMIN_URL =
             "https://ilovepdf4login.jhonabraham4450.workers.dev/admin";
 
+    private static final int FILE_CHOOSER = 1001;
+
     private WebView webView;
     private ProgressBar progress;
     private ValueCallback<Uri[]> fileCallback;
-
-    private static final int FILE_CHOOSER = 1001;
 
     private int dp(float value) {
         return (int) (
@@ -69,7 +70,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private GradientDrawable gradientBackground() {
-
         return new GradientDrawable(
                 GradientDrawable.Orientation.TL_BR,
                 new int[]{
@@ -97,19 +97,24 @@ public class MainActivity extends AppCompatActivity {
         getOnBackPressedDispatcher().addCallback(
                 this,
                 new OnBackPressedCallback(true) {
-
                     @Override
                     public void handleOnBackPressed() {
 
-                        if (webView != null &&
-                                webView.getVisibility() ==
-                                        View.VISIBLE &&
-                                webView.canGoBack()) {
+                        if (webView != null
+                                && webView.getVisibility()
+                                == View.VISIBLE
+                                && webView.canGoBack()) {
 
                             webView.goBack();
 
-                        } else {
+                        } else if (webView != null
+                                && webView.getVisibility()
+                                == View.VISIBLE) {
 
+                            webView = null;
+                            showWelcomeScreen();
+
+                        } else {
                             finish();
                         }
                     }
@@ -147,7 +152,6 @@ public class MainActivity extends AppCompatActivity {
 
         scrollView.addView(main);
 
-        // LOGO
         TextView logo =
                 new TextView(this);
 
@@ -170,7 +174,6 @@ public class MainActivity extends AppCompatActivity {
                 )
         );
 
-        // TAGLINE
         TextView tagline =
                 new TextView(this);
 
@@ -197,7 +200,6 @@ public class MainActivity extends AppCompatActivity {
                 taglineParams
         );
 
-        // IMAGE CARD
         LinearLayout imageCard =
                 new LinearLayout(this);
 
@@ -234,7 +236,6 @@ public class MainActivity extends AppCompatActivity {
                 imageCardParams
         );
 
-        // ACTUAL IMAGE
         ImageView homeImage =
                 new ImageView(this);
 
@@ -256,15 +257,12 @@ public class MainActivity extends AppCompatActivity {
                 )
         );
 
-        // WELCOME
         TextView welcome =
                 new TextView(this);
 
-        welcome.setText(
-                "Welcome Back!"
-        );
-
+        welcome.setText("Welcome Back!");
         welcome.setTextSize(26);
+
         welcome.setTypeface(
                 Typeface.DEFAULT,
                 Typeface.BOLD
@@ -289,7 +287,6 @@ public class MainActivity extends AppCompatActivity {
                 welcomeParams
         );
 
-        // LOGIN
         Button login =
                 createButton(
                         "Login",
@@ -305,16 +302,12 @@ public class MainActivity extends AppCompatActivity {
 
         loginParams.bottomMargin = dp(12);
 
-        main.addView(
-                login,
-                loginParams
-        );
+        main.addView(login, loginParams);
 
         login.setOnClickListener(
                 v -> openWebsite(BASE_URL)
         );
 
-        // REGISTER + ADMIN
         LinearLayout accountRow =
                 new LinearLayout(this);
 
@@ -322,9 +315,7 @@ public class MainActivity extends AppCompatActivity {
                 LinearLayout.HORIZONTAL
         );
 
-        accountRow.setGravity(
-                Gravity.CENTER
-        );
+        accountRow.setGravity(Gravity.CENTER);
 
         Button register =
                 createButton(
@@ -396,15 +387,12 @@ public class MainActivity extends AppCompatActivity {
                 v -> openWebsite(ADMIN_URL)
         );
 
-        // FORGOT PASSWORD
         TextView forgot =
                 new TextView(this);
 
-        forgot.setText(
-                "Forgot Password?"
-        );
-
+        forgot.setText("Forgot Password?");
         forgot.setTextSize(14);
+
         forgot.setTypeface(
                 Typeface.DEFAULT,
                 Typeface.BOLD
@@ -424,10 +412,7 @@ public class MainActivity extends AppCompatActivity {
 
         forgotParams.topMargin = dp(6);
 
-        main.addView(
-                forgot,
-                forgotParams
-        );
+        main.addView(forgot, forgotParams);
 
         forgot.setOnClickListener(
                 v -> openWebsite(
@@ -435,13 +420,12 @@ public class MainActivity extends AppCompatActivity {
                 )
         );
 
-        // TOOLS
         TextView tools =
                 new TextView(this);
 
         tools.setText(
-                "PDF  •  Word  •  Excel  •  PowerPoint\n" +
-                "Merge  •  Split  •  Compress  •  Convert"
+                "PDF  •  Word  •  Excel  •  PowerPoint\n"
+                        + "Merge  •  Split  •  Compress  •  Convert"
         );
 
         tools.setTextSize(13);
@@ -459,18 +443,14 @@ public class MainActivity extends AppCompatActivity {
 
         toolsParams.topMargin = dp(8);
 
-        main.addView(
-                tools,
-                toolsParams
-        );
+        main.addView(tools, toolsParams);
 
-        // FOOTER
         TextView footer =
                 new TextView(this);
 
         footer.setText(
-                "Safe • Fast • Easy to Use\n\n" +
-                "© iLovePDF4"
+                "Safe • Fast • Easy to Use\n\n"
+                        + "© iLovePDF4"
         );
 
         footer.setTextSize(12);
@@ -488,10 +468,7 @@ public class MainActivity extends AppCompatActivity {
 
         footerParams.topMargin = dp(5);
 
-        main.addView(
-                footer,
-                footerParams
-        );
+        main.addView(footer, footerParams);
 
         setContentView(scrollView);
     }
@@ -508,7 +485,6 @@ public class MainActivity extends AppCompatActivity {
         button.setText(text);
         button.setTextSize(14);
         button.setTextColor(textColor);
-
         button.setAllCaps(false);
 
         button.setTypeface(
@@ -536,17 +512,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @SuppressLint("SetJavaScriptEnabled")
-    private void openWebsite(String url) {
+    private void openWebsite(String pageUrl) {
 
         RelativeLayout root =
                 new RelativeLayout(this);
 
-        root.setBackgroundColor(
-                Color.WHITE
-        );
+        root.setBackgroundColor(Color.WHITE);
 
-        webView =
-                new WebView(this);
+        webView = new WebView(this);
 
         RelativeLayout.LayoutParams webParams =
                 new RelativeLayout.LayoutParams(
@@ -554,14 +527,9 @@ public class MainActivity extends AppCompatActivity {
                         -1
                 );
 
-        root.addView(
-                webView,
-                webParams
-        );
+        root.addView(webView, webParams);
 
-        progress =
-                new ProgressBar(this);
-
+        progress = new ProgressBar(this);
         progress.setIndeterminate(true);
 
         RelativeLayout.LayoutParams progressParams =
@@ -574,10 +542,7 @@ public class MainActivity extends AppCompatActivity {
                 RelativeLayout.CENTER_IN_PARENT
         );
 
-        root.addView(
-                progress,
-                progressParams
-        );
+        root.addView(progress, progressParams);
 
         setContentView(root);
 
@@ -627,6 +592,116 @@ public class MainActivity extends AppCompatActivity {
                 true
         );
 
+        /*
+         * Download handling:
+         * Downloaded files are saved to the
+         * Android Downloads folder.
+         */
+        webView.setDownloadListener(
+                (downloadUrl,
+                 userAgent,
+                 contentDisposition,
+                 mimetype,
+                 contentLength) -> {
+
+                    try {
+
+                        Uri downloadUri =
+                                Uri.parse(downloadUrl);
+
+                        DownloadManager.Request request =
+                                new DownloadManager.Request(
+                                        downloadUri
+                                );
+
+                        String cookieValue =
+                                CookieManager.getInstance()
+                                        .getCookie(downloadUrl);
+
+                        if (cookieValue != null
+                                && !cookieValue.isEmpty()) {
+
+                            request.addRequestHeader(
+                                    "Cookie",
+                                    cookieValue
+                            );
+                        }
+
+                        if (userAgent != null
+                                && !userAgent.isEmpty()) {
+
+                            request.addRequestHeader(
+                                    "User-Agent",
+                                    userAgent
+                            );
+                        }
+
+                        String fileName =
+                                URLUtil.guessFileName(
+                                        downloadUrl,
+                                        contentDisposition,
+                                        mimetype
+                                );
+
+                        request.setTitle(fileName);
+
+                        request.setDescription(
+                                "Downloading from iLovePDF4"
+                        );
+
+                        request.setNotificationVisibility(
+                                DownloadManager.Request
+                                        .VISIBILITY_VISIBLE_NOTIFY_COMPLETED
+                        );
+
+                        if (mimetype != null
+                                && !mimetype.isEmpty()) {
+
+                            request.setMimeType(mimetype);
+                        }
+
+                        request.setDestinationInExternalPublicDir(
+                                Environment.DIRECTORY_DOWNLOADS,
+                                fileName
+                        );
+
+                        DownloadManager manager =
+                                (DownloadManager)
+                                        getSystemService(
+                                                DOWNLOAD_SERVICE
+                                        );
+
+                        if (manager != null) {
+
+                            manager.enqueue(request);
+
+                            Toast.makeText(
+                                    MainActivity.this,
+                                    "Download started. Check Downloads.",
+                                    Toast.LENGTH_LONG
+                            ).show();
+
+                        } else {
+
+                            Toast.makeText(
+                                    MainActivity.this,
+                                    "Download manager is unavailable.",
+                                    Toast.LENGTH_LONG
+                            ).show();
+                        }
+
+                    } catch (Exception e) {
+
+                        Toast.makeText(
+                                MainActivity.this,
+                                "Download failed: "
+                                        + e.getMessage(),
+                                Toast.LENGTH_LONG
+                        ).show();
+                    }
+                }
+        );
+
         webView.setWebViewClient(
                 new WebViewClient() {
 
@@ -636,14 +711,12 @@ public class MainActivity extends AppCompatActivity {
                             WebResourceRequest request
                     ) {
 
-                        Uri uri =
-                                request.getUrl();
+                        Uri uri = request.getUrl();
 
-                        String host =
-                                uri.getHost();
+                        String host = uri.getHost();
 
-                        if (host != null &&
-                                host.endsWith(
+                        if (host != null
+                                && host.equalsIgnoreCase(
                                         "ilovepdf4login.jhonabraham4450.workers.dev"
                                 )) {
 
@@ -660,7 +733,13 @@ public class MainActivity extends AppCompatActivity {
 
                             startActivity(intent);
 
-                        } catch (Exception ignored) {
+                        } catch (Exception e) {
+
+                            Toast.makeText(
+                                    MainActivity.this,
+                                    "Cannot open this link.",
+                                    Toast.LENGTH_SHORT
+                            ).show();
                         }
 
                         return true;
@@ -673,7 +752,6 @@ public class MainActivity extends AppCompatActivity {
                     ) {
 
                         if (progress != null) {
-
                             progress.setVisibility(
                                     View.GONE
                             );
@@ -682,87 +760,18 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
 
-   webView.setDownloadListener(
-        (downloadUrl, userAgent, contentDisposition, mimetype, contentLength) -> {
-
-            try {
-
-                DownloadManager.Request request =
-                        new DownloadManager.Request(
-                            Uri.parse(downloadUrl)
-                        );
-
-                String cookies =
-                        CookieManager.getInstance()
-                                .getCookie(downloadUrl)
-
-                if (cookies != null) {
-                    request.addRequestHeader(
-                            "Cookie",
-                            cookies
-                    );
-                }
-
-                request.addRequestHeader(
-                        "User-Agent",
-                        userAgent
-                );
-
-                String fileName =
-                        URLUtil.guessFileName(
-                                url,
-                                contentDisposition,
-                                mimetype
-                        );
-
-                request.setTitle(fileName);
-
-                request.setDescription(
-                        "Downloading from iLovePDF4"
-                );
-
-                request.setNotificationVisibility(
-                        DownloadManager.Request
-                                .VISIBILITY_VISIBLE_NOTIFY_COMPLETED
-                );
-
-                request.setMimeType(mimetype);
-
-                request.setDestinationInExternalPublicDir(
-                        Environment.DIRECTORY_DOWNLOADS,
-                        fileName
-                );
-
-                DownloadManager manager =
-                        (DownloadManager)
-                                getSystemService(
-                                        DOWNLOAD_SERVICE
-                                );
-
-                if (manager != null) {
-                    manager.enqueue(request);
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-);     
         webView.setWebChromeClient(
                 new WebChromeClient() {
 
                     @Override
                     public boolean onShowFileChooser(
-                            WebView webView,
+                            WebView view,
                             ValueCallback<Uri[]> callback,
                             FileChooserParams params
                     ) {
 
                         if (fileCallback != null) {
-
-                            fileCallback.onReceiveValue(
-                                    null
-                            );
+                            fileCallback.onReceiveValue(null);
                         }
 
                         fileCallback = callback;
@@ -782,6 +791,12 @@ public class MainActivity extends AppCompatActivity {
                         } catch (Exception e) {
 
                             fileCallback = null;
+
+                            Toast.makeText(
+                                    MainActivity.this,
+                                    "Cannot open file picker.",
+                                    Toast.LENGTH_LONG
+                            ).show();
 
                             return false;
                         }
@@ -805,7 +820,7 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
 
-        webView.loadUrl(url);
+        webView.loadUrl(pageUrl);
     }
 
     @Override
@@ -821,13 +836,13 @@ public class MainActivity extends AppCompatActivity {
                 data
         );
 
-        if (requestCode == FILE_CHOOSER &&
-                fileCallback != null) {
+        if (requestCode == FILE_CHOOSER
+                && fileCallback != null) {
 
             Uri[] result = null;
 
-            if (resultCode == Activity.RESULT_OK &&
-                    data != null) {
+            if (resultCode == Activity.RESULT_OK
+                    && data != null) {
 
                 Uri uri = data.getData();
 
@@ -835,9 +850,7 @@ public class MainActivity extends AppCompatActivity {
 
                     result = new Uri[]{uri};
 
-                } else if (
-                        data.getClipData() != null
-                ) {
+                } else if (data.getClipData() != null) {
 
                     int count =
                             data.getClipData()
@@ -855,10 +868,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-            fileCallback.onReceiveValue(
-                    result
-            );
-
+            fileCallback.onReceiveValue(result);
             fileCallback = null;
         }
     }
