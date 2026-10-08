@@ -683,18 +683,18 @@ public class MainActivity extends AppCompatActivity {
         );
 
    webView.setDownloadListener(
-        (url, userAgent, contentDisposition, mimetype, contentLength) -> {
+        (downloadUrl, userAgent, contentDisposition, mimetype, contentLength) -> {
 
             try {
 
                 DownloadManager.Request request =
                         new DownloadManager.Request(
-                                Uri.parse(url)
+                            Uri.parse(downloadUrl)
                         );
 
                 String cookies =
                         CookieManager.getInstance()
-                                .getCookie(url);
+                                .getCookie(downloadUrl)
 
                 if (cookies != null) {
                     request.addRequestHeader(
