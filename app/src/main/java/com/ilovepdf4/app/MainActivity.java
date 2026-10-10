@@ -9,10 +9,12 @@ import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Base64;
 import android.os.Environment;
 import android.view.Gravity;
 import android.view.View;
 import android.webkit.CookieManager;
+import android.webkit.JavascriptInterface;
 import android.webkit.URLUtil;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
@@ -29,6 +31,8 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.OutputStream;
+
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.webkit.WebSettingsCompat;
@@ -43,6 +47,11 @@ public class MainActivity extends AppCompatActivity {
             "https://ilovepdf4login.jhonabraham4450.workers.dev/admin";
 
     private static final int FILE_CHOOSER = 1001;
+    private static final int SAVE_FILE_CHOOSER = 1002;
+
+    private byte[] pendingSaveBytes;
+    private String pendingSaveFileName;
+    private String pendingSaveMimeType;
 
     private WebView webView;
     private ProgressBar progress;
@@ -178,7 +187,7 @@ public class MainActivity extends AppCompatActivity {
                 new TextView(this);
 
         tagline.setText(
-                "Work Smarter • Not Harder"
+                "Work Smarter â€¢ Not Harder"
         );
 
         tagline.setTextSize(14);
@@ -424,8 +433,8 @@ public class MainActivity extends AppCompatActivity {
                 new TextView(this);
 
         tools.setText(
-                "PDF  •  Word  •  Excel  •  PowerPoint\n"
-                        + "Merge  •  Split  •  Compress  •  Convert"
+                "PDF  â€¢  Word  â€¢  Excel  â€¢  PowerPoint\n"
+                        + "Merge  â€¢  Split  â€¢  Compress  â€¢  Convert"
         );
 
         tools.setTextSize(13);
@@ -449,8 +458,8 @@ public class MainActivity extends AppCompatActivity {
                 new TextView(this);
 
         footer.setText(
-                "Safe • Fast • Easy to Use\n\n"
-                        + "© iLovePDF4"
+                "Safe â€¢ Fast â€¢ Easy to Use\n\n"
+                        + "Â© iLovePDF4"
         );
 
         footer.setTextSize(12);
@@ -520,6 +529,10 @@ public class MainActivity extends AppCompatActivity {
         root.setBackgroundColor(Color.WHITE);
 
         webView = new WebView(this);
+        webView.addJavascriptInterface(
+                new DownloadBridge(),
+                "AndroidDownload"
+        );
 
         RelativeLayout.LayoutParams webParams =
                 new RelativeLayout.LayoutParams(
@@ -823,6 +836,73 @@ public class MainActivity extends AppCompatActivity {
         webView.loadUrl(pageUrl);
     }
 
+    private class DownloadBridge {
+
+        @JavascriptInterface
+        public void saveFile(
+                String base64Data,
+                String fileName,
+                String mimeType
+        ) {
+
+            try {
+                byte[] decodedBytes =
+                        Base64.decode(base64Data, Base64.DEFAULT);
+
+                runOnUiThread(() -> {
+
+                    pendingSaveBytes = decodedBytes;
+                    pendingSaveFileName =
+                            (fileName == null || fileName.trim().isEmpty())
+                                    ? "download"
+                                    : fileName.replaceAll("[\\/:*?\"<>|]", "_");
+                    pendingSaveMimeType =
+                            (mimeType == null || mimeType.trim().isEmpty())
+                                    ? "application/octet-stream"
+                                    : mimeType;
+
+                    try {
+                        Intent intent = new Intent(
+                                Intent.ACTION_CREATE_DOCUMENT
+                        );
+                        intent.addCategory(Intent.CATEGORY_OPENABLE);
+                        intent.setType(pendingSaveMimeType);
+                        intent.putExtra(
+                                Intent.EXTRA_TITLE,
+                                pendingSaveFileName
+                        );
+
+                        startActivityForResult(
+                                intent,
+                                SAVE_FILE_CHOOSER
+                        );
+
+                    } catch (Exception e) {
+                        clearPendingSave();
+                        Toast.makeText(
+                                MainActivity.this,
+                                "Unable to open Save File screen.",
+                                Toast.LENGTH_LONG
+                        ).show();
+                    }
+                });
+
+            } catch (Exception e) {
+                runOnUiThread(() -> Toast.makeText(
+                        MainActivity.this,
+                        "Unable to prepare file for saving.",
+                        Toast.LENGTH_LONG
+                ).show());
+            }
+        }
+    }
+
+    private void clearPendingSave() {
+        pendingSaveBytes = null;
+        pendingSaveFileName = null;
+        pendingSaveMimeType = null;
+    }
+
     @Override
     protected void onActivityResult(
             int requestCode,
@@ -835,6 +915,53 @@ public class MainActivity extends AppCompatActivity {
                 resultCode,
                 data
         );
+
+        if (requestCode == SAVE_FILE_CHOOSER) {
+
+            if (resultCode == Activity.RESULT_OK
+                    && data != null
+                    && data.getData() != null
+                    && pendingSaveBytes != null) {
+
+                Uri destination = data.getData();
+
+                try (OutputStream output =
+                             getContentResolver().openOutputStream(destination)) {
+
+                    if (output == null) {
+                        throw new java.io.IOException(
+                                "Could not open selected destination."
+                        );
+                    }
+
+                    output.write(pendingSaveBytes);
+                    output.flush();
+
+                    Toast.makeText(
+                            MainActivity.this,
+                            "File saved successfully.",
+                            Toast.LENGTH_LONG
+                    ).show();
+
+                } catch (Exception e) {
+                    Toast.makeText(
+                            MainActivity.this,
+                            "File save failed: " + e.getMessage(),
+                            Toast.LENGTH_LONG
+                    ).show();
+                }
+
+            } else {
+                Toast.makeText(
+                        MainActivity.this,
+                        "Save cancelled.",
+                        Toast.LENGTH_SHORT
+                ).show();
+            }
+
+            clearPendingSave();
+            return;
+        }
 
         if (requestCode == FILE_CHOOSER
                 && fileCallback != null) {
